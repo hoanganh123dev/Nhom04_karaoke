@@ -10,72 +10,65 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
-    private List<Song> lstSong;
-    public SongAdapter(List<Song> lstSongcs){
-        lstSong = lstSongcs;
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolderCustom>{
+    private ArrayList<Song> karaokeSongs;
+
+    public void setList(ArrayList<Song> karaokeSongs) {
+        this.karaokeSongs = karaokeSongs;
+        this.notifyDataSetChanged();
     }
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(context);
+    public ViewHolderCustom onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolderCustom(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_song, parent, false));
+    }
 
-        View monhocView = inflater.inflate(R.layout.item_song, parent, false);
-        ViewHolder viewHolder = new ViewHolder(monhocView);
-        return viewHolder;
-    }
-    public Song getItemAtPosition(int position) {
-        return lstSong.get(position);
-    }
-    private OnItemClickListener onItemClickListener;
-    public interface OnItemClickListener {
-        void onItemClick(int position);
-    }
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.onItemClickListener = listener;
-    }
     @Override
-    public void onBindViewHolder(@NonNull SongAdapter.ViewHolder holder, int position) {
-        Song temp = lstSong.get(position);
-        holder.txtTitle.setText(temp.Title);
-        holder.txtNoiDung.setText(temp.NoiDung);
-        holder.txtTenCaSi.setText(temp.TenCaSi);
-        Context context = holder.imgView.getContext();
-        int imageId = context.getResources().getIdentifier(temp.TenHinh, "drawable", context.getPackageName());
-        if(imageId !=0)
-            holder.imgView.setImageResource(imageId);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int adapterPosition = holder.getAdapterPosition();
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    if (onItemClickListener != null) {
-                        onItemClickListener.onItemClick(adapterPosition);
-                    }
-                }
-            }
-        });
+    public void onBindViewHolder(@NonNull ViewHolderCustom holder, int position) {
+        holder.bindData(karaokeSongs.get(position));
+    }
+
+    public void addNewItemByLastItem() {
+        if(getItemCount()==0)return;
+        karaokeSongs.add(karaokeSongs.get(karaokeSongs.size()-1));
+        notifyItemInserted(karaokeSongs.size());
+    }
+    public void deletePosition(Integer position) {
+        this.karaokeSongs.remove(karaokeSongs.get(position));
+        this.notifyItemRemoved(position);
+        this.notifyItemRangeChanged(position, getItemCount());
+        System.out.println("position"+position+"count"+getItemCount());
     }
 
     @Override
     public int getItemCount() {
-        return lstSong.size();
+        return karaokeSongs != null ? karaokeSongs.size() : 0;
     }
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgView;
-        TextView txtTitle;
-        TextView txtNoiDung;
-        TextView txtTenCaSi;
-        public ViewHolder(@NonNull View itemView){
-            super(itemView);
 
-            imgView = (ImageView) itemView.findViewById(R.id.imgSong);
-            txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
-            txtNoiDung = (TextView) itemView.findViewById(R.id.txtNoiDung);
-            txtTenCaSi = (TextView) itemView.findViewById(R.id.txtTenCaSi);
+    class ViewHolderCustom extends RecyclerView.ViewHolder {
+
+        private TextView code;
+        private TextView title;
+        private TextView description;
+        private TextView author;
+
+        public ViewHolderCustom(View itemView) {
+            super(itemView);
+            code = (TextView) itemView.findViewById(R.id.karaokeCode);
+            title = (TextView) itemView.findViewById(R.id.karaokeTitle);
+            description = (TextView) itemView.findViewById(R.id.karaokeDescription);
+            author = (TextView) itemView.findViewById(R.id.karaokeAuthor);
+        }
+
+        public void bindData(Song item) {
+            code.setText(item.Code);
+            title.setText(item.Title);
+            description.setText(item.Description);
+            author.setText(item.Author);
         }
     }
 }
